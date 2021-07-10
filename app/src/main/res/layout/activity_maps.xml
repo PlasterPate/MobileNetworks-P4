@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:map="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/tech_legend"
+        android:elevation="10dp"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/legend"
+        android:layout_margin="24dp"
+        android:paddingBottom="16dp"
+        map:layout_constraintWidth_percent="0.3"
+        map:layout_constraintTop_toTopOf="parent"
+        map:layout_constraintStart_toStartOf="parent">
+
+        <TextView
+            android:id="@+id/technology_legend"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Technology"
+            android:textSize="16sp"
+            android:layout_margin="16sp"
+            map:layout_constraintStart_toStartOf="parent"
+            map:layout_constraintTop_toTopOf="parent"
+            map:layout_constraintEnd_toEndOf="parent"/>
+
+        <View
+            android:id="@+id/color_2g"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/circle"
+            android:backgroundTint="#0000ff"
+            map:layout_constraintEnd_toStartOf="@id/lable_2g"
+            map:layout_constraintStart_toStartOf="parent"
+            map:layout_constraintTop_toBottomOf="@id/technology_legend"/>
+
+        <TextView
+            android:id="@+id/lable_2g"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="2G"
+            map:layout_constraintEnd_toEndOf="parent"
+            map:layout_constraintTop_toTopOf="@id/color_2g"
+            map:layout_constraintStart_toEndOf="@id/color_2g"/>
+
+        <View
+            android:id="@+id/color_3g"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/circle"
+            android:backgroundTint="#00ff00"
+            map:layout_constraintEnd_toStartOf="@id/lable_3g"
+            map:layout_constraintStart_toStartOf="parent"
+            map:layout_constraintTop_toBottomOf="@id/color_2g"/>
+
+        <TextView
+            android:id="@+id/lable_3g"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="3G"
+            map:layout_constraintEnd_toEndOf="parent"
+            map:layout_constraintTop_toTopOf="@id/color_3g"
+            map:layout_constraintStart_toEndOf="@id/color_3g"/>
+
+        <View
+            android:id="@+id/color_4g"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/circle"
+            android:layout_marginBottom="16dp"
+            android:backgroundTint="#ff0000"
+            map:layout_constraintEnd_toStartOf="@id/lable_4g"
+            map:layout_constraintStart_toStartOf="parent"
+            map:layout_constraintTop_toBottomOf="@id/color_3g"/>
+
+        <TextView
+            android:id="@+id/lable_4g"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="4G"
+            map:layout_constraintEnd_toEndOf="parent"
+            map:layout_constraintTop_toTopOf="@id/color_4g"
+            map:layout_constraintStart_toEndOf="@id/color_4g"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+<!--    <com.google.android.gms.maps.MapView-->
+<!--        android:id="@+id/map"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent"/>-->
+
+    <Button
+        android:id="@+id/log_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="32dp"
+        android:text="Log Data"
+        android:backgroundTint="@color/green"
+        map:layout_constraintBottom_toBottomOf="parent"
+        map:layout_constraintStart_toStartOf="parent"
+        map:layout_constraintEnd_toEndOf="parent"/>
+
+    <fragment
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".ui.MapActivity" />
+</androidx.constraintlayout.widget.ConstraintLayout>

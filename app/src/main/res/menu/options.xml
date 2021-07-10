@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/option_tech"
+            android:checked="true"
+            android:title="Technology" />
+
+        <item
+            android:id="@+id/option_plmn"
+            android:title="PLMN" />
+
+        <item
+            android:id="@+id/option_cell"
+            android:title="Cell code" />
+
+        <item
+            android:id="@+id/option_ac"
+            android:title="Area Code" />
+    </group>
+</menu>
