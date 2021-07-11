@@ -92,21 +92,107 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <LinearLayout
+        android:elevation="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="24dp"
+        android:padding="16dp"
+        android:orientation="vertical"
+        android:background="@drawable/legend"
+        map:layout_constraintStart_toStartOf="parent"
+        map:layout_constraintBottom_toBottomOf="parent">
+        
+        <TextView
+            android:id="@+id/cell_id_txt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:textColor="@android:color/black"
+            android:text="ID: %d"/>
+
+        <TextView
+            android:id="@+id/strength_txt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:textColor="@android:color/black"
+            android:text="Signal strength: %d dbm"/>
+
+        <TextView
+            android:id="@+id/uplink_txt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:textColor="@android:color/black"
+            android:text="UL speed: %.1f Mbps"/>
+
+        <TextView
+            android:id="@+id/downlink_txt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:textColor="@android:color/black"
+            android:text="DL speed: %.1f Mbps"/>
+
+        <TextView
+            android:id="@+id/mcc_txt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:textColor="@android:color/black"
+            android:text="mcc: %d"/>
+
+        <TextView
+            android:id="@+id/mnc_txt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:textColor="@android:color/black"
+            android:text="mnc: %d"/>
+
+        <TextView
+            android:id="@+id/asu_txt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:textColor="@android:color/black"
+            android:text="%s: %d"/>
+
+        <TextView
+            android:id="@+id/rsrp_txt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:textColor="@android:color/black"
+            android:visibility="gone"
+            android:text="rsrp: %d"/>
+
+        <TextView
+            android:id="@+id/rsrq_txt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:textColor="@android:color/black"
+            android:visibility="gone"
+            android:text="rsrq: %d"/>
+
+    </LinearLayout>
 <!--    <com.google.android.gms.maps.MapView-->
 <!--        android:id="@+id/map"-->
 <!--        android:layout_width="match_parent"-->
 <!--        android:layout_height="match_parent"/>-->
 
-    <Button
-        android:id="@+id/log_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="32dp"
-        android:text="Log Data"
-        android:backgroundTint="@color/green"
-        map:layout_constraintBottom_toBottomOf="parent"
-        map:layout_constraintStart_toStartOf="parent"
-        map:layout_constraintEnd_toEndOf="parent"/>
+<!--    <Button-->
+<!--        android:id="@+id/log_btn"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_marginBottom="32dp"-->
+<!--        android:text="Log Data"-->
+<!--        android:backgroundTint="@color/green"-->
+<!--        map:layout_constraintBottom_toBottomOf="parent"-->
+<!--        map:layout_constraintStart_toStartOf="parent"-->
+<!--        map:layout_constraintEnd_toEndOf="parent"/>-->
 
     <fragment
         android:id="@+id/map"

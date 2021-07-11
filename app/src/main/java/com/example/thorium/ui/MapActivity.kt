@@ -4,13 +4,18 @@ import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.location.Location
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.os.Build
 import android.os.Bundle
 import android.os.Looper
 import android.telephony.*
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.Button
+import android.widget.TextView
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.ViewModelProvider
@@ -18,6 +23,7 @@ import com.example.thorium.Constants
 import com.example.thorium.LocationHelper
 import com.example.thorium.R
 import com.example.thorium.data.entity.CellInfoData
+import com.example.thorium.data.entity.QosParameters
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -51,9 +57,14 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var telephonyManager: TelephonyManager
 
+    private lateinit var connectivityManager: ConnectivityManager
+
+    private var networkCapabilities: NetworkCapabilities? = null
+
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     private val networkTypeListener = object : PhoneStateListener() {
+        @RequiresApi(Build.VERSION_CODES.O)
         @SuppressLint("MissingPermission")
         override fun onDataConnectionStateChanged(state: Int, networkType: Int) {
             if (networkType != 0) {
@@ -75,11 +86,15 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         mapFragment.getMapAsync(this)
 
         telephonyManager = getSystemService(TELEPHONY_SERVICE) as TelephonyManager
+        connectivityManager = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
-        findViewById<Button>(R.id.log_btn).setOnClickListener {
-            mapViewModel.getAllInfo()
-        }
+        networkCapabilities =
+            connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
+
+//        findViewById<Button>(R.id.log_btn).setOnClickListener {
+//            mapViewModel.getAllInfo()
+//        }
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
@@ -104,6 +119,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             .setSmallestDisplacement(Constants.LOCATION_UPDATE_SMALLEST_DISPLACEMENT)
 
         val locationCallback = object : LocationCallback() {
+            @RequiresApi(Build.VERSION_CODES.O)
             override fun onLocationResult(locationResult: LocationResult) {
                 locationResult.locations.forEach {
                     extractServingCellInfo(
@@ -125,10 +141,15 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         )
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("MissingPermission")
     private fun extractServingCellInfo(cellInfo: MutableList<CellInfo>?, location: Location) {
         val servingCellInfo = cellInfo?.first { it.isRegistered }
         var cellInfoData = CellInfoData()
+        var qosParameters = QosParameters(
+            networkCapabilities!!.linkUpstreamBandwidthKbps / 1000.0,
+            networkCapabilities!!.linkDownstreamBandwidthKbps / 1000.0,
+        )
         when (servingCellInfo) {
             // 2G
             is CellInfoGsm -> {
@@ -136,6 +157,15 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                 cellInfoData = CellInfoData(
                     identityGsm, location.latitude, location.longitude
                 )
+                with(servingCellInfo.cellSignalStrength) {
+                    qosParameters = qosParameters.copy(
+                        cellId = identityGsm.cid,
+                        mcc = cellInfoData.mcc?.toInt() ?: 0,
+                        mnc = cellInfoData.mnc?.toInt() ?: 0,
+                        strength = dbm,
+                        rssi = asuLevel
+                    )
+                }
             }
             // 3G
             is CellInfoWcdma -> {
@@ -143,6 +173,16 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                 cellInfoData = CellInfoData(
                     identityWcdma, location.latitude, location.longitude
                 )
+                Log.d(TAG, "3G")
+                with(servingCellInfo.cellSignalStrength) {
+                    qosParameters = qosParameters.copy(
+                        cellId = identityWcdma.cid,
+                        mcc = cellInfoData.mcc?.toInt() ?: 0,
+                        mnc = cellInfoData.mnc?.toInt() ?: 0,
+                        strength = dbm,
+                        rscp = asuLevel
+                    )
+                }
             }
             // 4G
             is CellInfoLte -> {
@@ -150,12 +190,25 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                 cellInfoData = CellInfoData(
                     identityLte, location.latitude, location.longitude
                 )
+                Log.d(TAG, "4G")
+                with(servingCellInfo.cellSignalStrength) {
+                    qosParameters = qosParameters.copy(
+                        cellId = identityLte.ci,
+                        mcc = cellInfoData.mcc?.toInt() ?: 0,
+                        mnc = cellInfoData.mnc?.toInt() ?: 0,
+                        strength = dbm,
+                        rscp = this.asuLevel,
+                        rsrp = rsrp,
+                        rsrq = rsrq
+                    )
+                }
             }
         }
 
         cellInfoData = setCellInfoColors(cellInfoData)
         mapViewModel.addCellInfo(cellInfoData)
         drawCircleOnMap(cellInfoData)
+        writeQosParameters(qosParameters)
     }
 
     private fun setCellInfoColors(cellInfoData: CellInfoData): CellInfoData {
@@ -296,6 +349,47 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                     getTelephonyInfo()
                 }
             }
+        }
+    }
+
+    private fun writeQosParameters(qosParameters: QosParameters) {
+        val cellIdTxt = findViewById<TextView>(R.id.cell_id_txt)
+        cellIdTxt.text = String.format(cellIdTxt.text.toString(), qosParameters.cellId)
+
+        val strengthIdTxt = findViewById<TextView>(R.id.strength_txt)
+        strengthIdTxt.text = String.format(strengthIdTxt.text.toString(), qosParameters.strength)
+
+        val uplinkTxt = findViewById<TextView>(R.id.uplink_txt)
+        uplinkTxt.text = String.format(uplinkTxt.text.toString(), qosParameters.uplinkSpeed)
+
+        val downlinkTxt = findViewById<TextView>(R.id.downlink_txt)
+        downlinkTxt.text = String.format(downlinkTxt.text.toString(), qosParameters.downlinkSpeed)
+
+        val mccTxt = findViewById<TextView>(R.id.mcc_txt)
+        mccTxt.text = String.format(mccTxt.text.toString(), qosParameters.mcc)
+        val mncTxt = findViewById<TextView>(R.id.mnc_txt)
+        mncTxt.text = String.format(mncTxt.text.toString(), qosParameters.mnc)
+
+        val asuTxt = findViewById<TextView>(R.id.asu_txt)
+        asuTxt.text = if (qosParameters.rssi != null)
+            String.format(asuTxt.text.toString(), "rssi", qosParameters.rssi)
+        else
+            String.format(asuTxt.text.toString(), "rscp", qosParameters.rscp)
+
+        val rsrpTxt = findViewById<TextView>(R.id.rsrp_txt)
+        if (qosParameters.rsrp != null) {
+            rsrpTxt.text = String.format(rsrpTxt.text.toString(), qosParameters.rsrp)
+            rsrpTxt.visibility = View.VISIBLE
+        } else{
+            rsrpTxt.visibility = View.GONE
+        }
+
+        val rsrqTxt = findViewById<TextView>(R.id.rsrq_txt)
+        if (qosParameters.rsrq != null) {
+            rsrqTxt.text = String.format(rsrqTxt.text.toString(), qosParameters.rsrq)
+            rsrqTxt.visibility = View.VISIBLE
+        } else{
+            rsrqTxt.visibility = View.GONE
         }
     }
 }
